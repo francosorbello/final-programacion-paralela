@@ -1,0 +1,68 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+struct DebugObject
+{
+    float3 data;
+};
+
+RWStructuredBuffer<DebugObject> DebugBuffer;
+Texture2D<float4> InputTexture;
+RWTexture2D<float4> Result;
+float3x3 ConvolutionMatrix;
+int Resolution;
+
+float GetBlurPixel(uint3 id)
+{
+    // CreateBlurMatrix();
+
+    float3x3 kernelData;
+    
+    kernelData[0][0] = InputTexture[id.xy-1].r;
+    kernelData[0][1] = InputTexture[float2(id.x-1,id.y-1)].r;
+    kernelData[0][2] = InputTexture[float2(id.x+1,id.y+1)].r;
+    kernelData[1][0] = InputTexture[float2(id.x-1,id.y)].r;
+    kernelData[1][1] = InputTexture[id.xy].r;
+    kernelData[1][2] = InputTexture[float2(id.x+1,id.y)].r;
+    kernelData[2][0] = InputTexture[float2(id.x-1,id.y+1)].r;
+    kernelData[2][1] = InputTexture[float2(id.x,id.y+1)].r;
+    kernelData[2][2] = InputTexture[float2(id.x+1,id.y+1)].r;
+    
+    float finalValue = 0.0;
+    for(uint i=0; i<3; i++)
+    {
+        for(uint j=0; j<3; j++)
+        {
+            finalValue += kernelData[i][j] * ConvolutionMatrix[i][j];
+        }
+    }
+    return finalValue;
+}
+
+//grupos de 64x64(4096), con 8x8(64) hilos
+//(64,64,1) * (8,8,1) + (7,7,1) = (519,519,2)
+[numthreads(8,8,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    CreateBlurMatrix();
+
+    // TODO: insert actual code here!
+    DebugObject o = DebugBuffer[id.x];
+    
+    // float finalValue = 0.0;
+    // for(uint i=0; i<3; i++)
+    // {
+    //     for(uint j=0; j<3; j++)
+    //     {
+    //         float2 pos = float2(id.x+i,id.y+j);
+    //         finalValue += InputTexture[pos].r * BLUR_MATRIX[i][j];
+    //     }
+    // }
+    // o.data = float3(InputTexture[id.xy].x, finalValue,0.0);
+    float finalValue = GetBlurPixel(id);
+    
+    o.data = float3(InputTexture[id.xy].r,finalValue,ConvolutionMatrix[1][1]);
+    DebugBuffer[id.x] = o;
+    
+    Result[id.xy] = finalValue;
+}

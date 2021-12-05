@@ -11,78 +11,64 @@ public class ConvolutionManager : MonoBehaviour
 {
     public ComputeShader computeShader;
     public Texture InputTexture;
-    public RenderTexture renderTexture;
+    public RenderTexture OutputTexture;
     public ComputeBuffer debugBuffer;
+    public Kernel[] kernels;
 
     private DebugObject[] debugData;
 
     private void Start() 
     {
-        RenderComputeShader();
+        ApplyFilters();
     }
 
-    private void RenderComputeShader() 
+    public void ApplyFilters()
     {
-        if (renderTexture == null)
+        if (OutputTexture == null)
         {
-            renderTexture = new RenderTexture(512,512,24);
-            renderTexture.enableRandomWrite = true; 
-            renderTexture.Create();
+            OutputTexture = new RenderTexture(512,512,24);
+            OutputTexture.enableRandomWrite = true; 
+            OutputTexture.Create();
         }
+        Graphics.Blit(InputTexture,OutputTexture);
+        RenderTexture nTex = OutputTexture;
+        var rend = GetComponent<Renderer>();
+        if(rend != null)
+            rend.material.SetTexture("_MainTex",nTex);
+
+        foreach (var kernel in kernels)
+        {
+            nTex = RenderComputeShader(nTex,kernel.GetKernelMatrix());
+            
+            // var rend = GetComponent<Renderer>();
+            if(rend != null)
+                rend.material.SetTexture("_MainTex",nTex);
+        }
+    }
+
+    private RenderTexture RenderComputeShader(RenderTexture inputTex, Matrix4x4 matrixKernel) 
+    {
+        RenderTexture outputTex = new RenderTexture(512,512,24);
+        outputTex.enableRandomWrite = true; 
+        outputTex.Create();
 
         debugData = new DebugObject[512];
         int positionSize = sizeof(float) * 3;
         debugBuffer = new ComputeBuffer(debugData.Length, positionSize);
         
         computeShader.SetBuffer(0,"DebugBuffer",debugBuffer);
-        computeShader.SetTexture(0,"Result",renderTexture);
-        computeShader.SetTexture(0,"InputTexture",InputTexture);
-        var test = new Matrix4x4(
-            new Vector4(-1,-1,-1,0),
-            new Vector4(-1,8,-1,0),
-            new Vector4(-1,-1,-1,0),
-            Vector4.zero
-        );
-        computeShader.SetMatrix("ConvolutionMatrix", test);
+        computeShader.SetTexture(0,"InputTexture",inputTex);
+        computeShader.SetTexture(0,"Result",outputTex);
+
+        computeShader.SetMatrix("ConvolutionMatrix", matrixKernel);
         // computeShader.Dispatch(0, 1, 1, 1);
-        computeShader.Dispatch(0, renderTexture.width / 8, renderTexture.height / 8, 1);    
+        computeShader.Dispatch(0, outputTex.width / 8, outputTex.height / 8, 1);    
 
         debugBuffer.GetData(debugData);
-        Debug.Log(debugData.Length);
         foreach (var item in debugData)
         {
             Debug.Log(item.data);
         }
-        var rend = GetComponent<Renderer>();
-        if(rend != null)
-            rend.material.SetTexture("_MainTex",renderTexture);
+        return outputTex;
     }
-    
-
-    // private void OnRenderImage(RenderTexture src, RenderTexture dest)
-    // {
-    //     if (renderTexture == null)
-    //     {
-    //         renderTexture = new RenderTexture(512,512,24);
-    //         renderTexture.enableRandomWrite = true;
-    //         renderTexture.Create();
-    //     }
-
-    //     debugData = new DebugObject[512];
-    //     int positionSize = sizeof(float) * 3;
-    //     debugBuffer = new ComputeBuffer(debugData.Length, positionSize);
-        
-    //     computeShader.SetBuffer(0,"DebugBuffer",debugBuffer);
-    //     computeShader.SetTexture(0,"Result",renderTexture);
-    //     computeShader.SetTexture(0,"InputTexture",InputTexture);
-    //     // computeShader.Dispatch(0, 1, 1, 1);
-    //     computeShader.Dispatch(0, renderTexture.width / 8, renderTexture.height / 8, 1);    
-
-    //     debugBuffer.GetData(debugData);
-    //     Debug.Log(debugData.Length);
-    //     foreach (var item in debugData)
-    //     {
-    //         Debug.Log(item.data);
-    //     }    
-    // }
 }
