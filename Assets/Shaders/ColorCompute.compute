@@ -19,7 +19,7 @@ float GetBlurPixel(uint3 id, int channel)
     float3x3 kernelData;
     
     kernelData[0][0] = InputTexture[id.xy-1][channel];
-    kernelData[0][1] = InputTexture[float2(id.x-1,id.y-1)][channel];
+    kernelData[0][1] = InputTexture[float2(id.x,id.y-1)][channel];
     kernelData[0][2] = InputTexture[float2(id.x+1,id.y+1)][channel];
     kernelData[1][0] = InputTexture[float2(id.x-1,id.y)][channel];
     kernelData[1][1] = InputTexture[id.xy][channel];

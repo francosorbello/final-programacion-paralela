@@ -3,6 +3,8 @@
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
+        _Quantity("Quantity",Range(0,1)) = 0
+        _Strength("Strength",Range(1,4)) = 1
     }
     SubShader
     {
@@ -16,6 +18,7 @@
             #pragma fragment frag
             // make fog work
             #pragma multi_compile_fog
+
 
             #include "UnityCG.cginc"
 
@@ -34,6 +37,9 @@
 
             sampler2D _MainTex;
             float4 _MainTex_ST;
+            float4 _MainTex_TexelSize;
+            float _Quantity;
+            int _Strength;
 
             v2f vert (appdata v)
             {
@@ -44,17 +50,75 @@
                 return o;
             }
 
-            float3x3 blurMatrix = {
-                0.0625f, 0.125f, 0.0625f,
-                0.125f, 0.25f, 0.125f,
-                0.0625f, 0.125f, 0.0625f
-            };
+            float3x3 CreateBlurMatrix(){
+                float3x3 BLUR_MATRIX;
+                BLUR_MATRIX[0][0] = 0.0625;
+                BLUR_MATRIX[0][1] = 0.125;
+                BLUR_MATRIX[0][2] = 0.0625;
+                
+                BLUR_MATRIX[1][0] = 0.125;
+                BLUR_MATRIX[1][1] = 0.25;
+                BLUR_MATRIX[1][2] = 0.125;
+                
+                BLUR_MATRIX[2][0] = 0.0625;
+                BLUR_MATRIX[2][1] = 0.125;
+                BLUR_MATRIX[2][2] = 0.0625;
+
+                return BLUR_MATRIX;
+            }
+
+            float3x3 CreateOutilineMatrix(){
+                float3x3 BLUR_MATRIX;
+                BLUR_MATRIX[0][0] = -1;
+                BLUR_MATRIX[0][1] = -1;
+                BLUR_MATRIX[0][2] = -1;
+                
+                BLUR_MATRIX[1][0] = -1;
+                BLUR_MATRIX[1][1] = 8;
+                BLUR_MATRIX[1][2] = -1;
+                
+                BLUR_MATRIX[2][0] = -1;
+                BLUR_MATRIX[2][1] = -1;
+                BLUR_MATRIX[2][2] = -1;
+                
+                return BLUR_MATRIX;
+            }
+
+            float3x3 GetAdjacentValues(float2 uv)
+            {
+                float3x3 adjacent;
+                float offset = _MainTex_TexelSize.x * _Strength;
+                adjacent[0][0] = tex2D(_MainTex,float2(uv.x-offset, uv.y-offset));
+                adjacent[0][1] = tex2D(_MainTex,float2(uv.x, uv.y-offset));
+                adjacent[0][2] = tex2D(_MainTex,float2(uv.x+offset, uv.y+offset));
+                
+                adjacent[1][0] = tex2D(_MainTex,float2(uv.x-offset, uv.y));
+                adjacent[1][1] = tex2D(_MainTex,float2(uv.x, uv.y));
+                adjacent[1][2] = tex2D(_MainTex,float2(uv.x+offset, uv.y));
+                
+                adjacent[2][0] = tex2D(_MainTex,float2(uv.x-offset, uv.y+offset));
+                adjacent[2][1] = tex2D(_MainTex,float2(uv.x, uv.y+offset));
+                adjacent[2][2] = tex2D(_MainTex,float2(uv.x+offset, uv.y+offset));
+
+                adjacent = adjacent * _Quantity;
+
+                return adjacent;
+            }
 
             fixed4 frag (v2f i) : SV_Target
             {
+                float3x3 blurMatrix = CreateBlurMatrix();
+                float3x3 adjacent = GetAdjacentValues(i.uv);
                 // sample the texture
-                fixed4 col = tex2D(_MainTex, i.uv);
-
+                // fixed4 col = tex2D(_MainTex, i.uv);
+                fixed4 col = fixed4(0,0,0,0) + tex2D(_MainTex,i.uv) * (1-_Quantity);
+                for(int i = 0; i < 3; i++)
+                {
+                    for(int j = 0; j < 3; j++)
+                    {
+                        col += adjacent[i][j] * blurMatrix[i][j];
+                    }
+                }
 
                 // apply fog
                 UNITY_APPLY_FOG(i.fogCoord, col);
