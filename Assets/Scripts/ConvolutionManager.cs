@@ -69,6 +69,9 @@ public class ConvolutionManager : MonoBehaviour
         {
             Debug.Log(item.data);
         }
+
+        debugBuffer.Dispose();
+        debugBuffer = null;
         return outputTex;
     }
 }
