@@ -290,6 +290,7 @@ GameObject:
   - component: {fileID: 1370479021}
   - component: {fileID: 1370479020}
   - component: {fileID: 1370479019}
+  - component: {fileID: 1370479022}
   - component: {fileID: 1370479018}
   m_Layer: 0
   m_Name: Quad
@@ -373,6 +374,21 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1370479022
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1370479017}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5cb2bbc97b104914c870399ad907d85b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  meshRenderer: {fileID: 1370479019}
+  inputTexture: {fileID: 2800000, guid: 4b00f33d0cfa6f941bfb272bdc8cc0d2, type: 3}
+  kernel: {fileID: 11400000, guid: e4438954c27bcae438e6f909356f5dd3, type: 2}
 --- !u!1 &2094244035
 GameObject:
   m_ObjectHideFlags: 0

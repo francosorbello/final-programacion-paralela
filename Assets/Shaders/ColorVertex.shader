@@ -42,6 +42,7 @@
             float4 _Color;
             float _Quantity;
             int _Strength;
+            float4x4 _ConvolutionMatrix;
 
             v2f vert (appdata v)
             {
@@ -137,7 +138,7 @@
                 {
                     for(int j = 0; j < 3; j++)
                     {
-                        col += adjacent[i][j] * blurMatrix[i][j];
+                        col += adjacent[i][j] * _ConvolutionMatrix[i][j];
                     }
                 }
                 col.a = 1;
