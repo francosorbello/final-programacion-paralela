@@ -13,16 +13,17 @@ public class ConvolutionManager : MonoBehaviour
     public Texture InputTexture;
     public RenderTexture OutputTexture;
     public ComputeBuffer debugBuffer;
-    public Kernel[] kernels;
+    [Range(1,4)]public int Strength = 1;
+    public Kernel[] Kernels;
 
     private DebugObject[] debugData;
 
     private void Start() 
     {
-        ApplyFilters();
+        ApplyFilters(Kernels);
     }
 
-    public void ApplyFilters()
+    public void ApplyFilters(Kernel[] kernels)
     {
         if (OutputTexture == null)
         {
@@ -59,6 +60,7 @@ public class ConvolutionManager : MonoBehaviour
         computeShader.SetBuffer(0,"DebugBuffer",debugBuffer);
         computeShader.SetTexture(0,"InputTexture",inputTex);
         computeShader.SetTexture(0,"Result",outputTex);
+        computeShader.SetInt("Strength",Strength);
 
         computeShader.SetMatrix("ConvolutionMatrix", matrixKernel);
         // computeShader.Dispatch(0, 1, 1, 1);
