@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 076443bdf82134940aa6870b4fd1d813, type: 3}
-  m_Name: Vertical Sobel
+  m_Name: Sobel Vertical
   m_EditorClassIdentifier: 
   Name: Vertical Sobel
   Strenght: 1

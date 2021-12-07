@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+// https://colorhunt.co/palette/d06224ae431e8a8635e9c891
 
 public class FilterWindow : MonoBehaviour
 {
@@ -33,8 +34,8 @@ public class FilterWindow : MonoBehaviour
                         checkbox.SetIsOn(false);
                     }
                 }
+                kernels.Clear();
             }
-            kernels.Clear();
             kernels.Add(kernel);
         } else 
         {
