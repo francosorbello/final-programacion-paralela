@@ -4,6 +4,7 @@
     {
         _MainTex ("Texture", 2D) = "white" {}
         _OutlineColor("OutlineColor",Color) = (0,0,0,1)
+        _Strength("Strength",Range(0,10)) = 1
     }
     SubShader
     {
@@ -38,6 +39,7 @@
             float4 _MainTex_TexelSize;
             fixed4 _OutlineColor;
             sampler2D _CameraDepthTexture;
+            int _Strength;
 
             v2f vert (appdata v)
             {
@@ -52,19 +54,19 @@
             fixed4 GetSobelDepth(sampler2D tex, float2 uv, float3x3 convolutionMat)
             {
                 fixed4 color = fixed4(0,0,0,0);
-                float offset = _MainTex_TexelSize.x * 1;
+                float offset = _MainTex_TexelSize.x * _Strength;
 
-                color += tex2D(tex,float2(uv.x-offset, uv.y-offset)).r * convolutionMat[0][0];
-                color += tex2D(tex,float2(uv.x, uv.y-offset)).r * convolutionMat[0][1];
-                color += tex2D(tex,float2(uv.x+offset, uv.y+offset)).r * convolutionMat[0][2];
+                color += Linear01Depth(tex2D(tex,float2(uv.x-offset, uv.y-offset)).r) * convolutionMat[0][0];
+                color += Linear01Depth(tex2D(tex,float2(uv.x, uv.y-offset)).r) * convolutionMat[0][1];
+                color += Linear01Depth(tex2D(tex,float2(uv.x+offset, uv.y+offset)).r) * convolutionMat[0][2];
                 
-                color += tex2D(tex,float2(uv.x-offset, uv.y)).r * convolutionMat[1][0];
-                color += tex2D(tex,uv) * convolutionMat[1][1];
-                color += tex2D(tex,float2(uv.x+offset, uv.y)).r * convolutionMat[1][2];
+                color += Linear01Depth(tex2D(tex,float2(uv.x-offset, uv.y)).r) * convolutionMat[1][0];
+                color += Linear01Depth(tex2D(tex,uv).r) * convolutionMat[1][1];
+                color += Linear01Depth(tex2D(tex,float2(uv.x+offset, uv.y)).r) * convolutionMat[1][2];
                 
-                color += tex2D(tex,float2(uv.x-offset, uv.y+offset)).r * convolutionMat[2][0];
-                color += tex2D(tex,float2(uv.x, uv.y+offset)).r * convolutionMat[2][1];
-                color += tex2D(tex,float2(uv.x+offset, uv.y+offset)).r * convolutionMat[2][2];
+                color += Linear01Depth(tex2D(tex,float2(uv.x-offset, uv.y+offset)).r) * convolutionMat[2][0];
+                color += Linear01Depth(tex2D(tex,float2(uv.x, uv.y+offset)).r) * convolutionMat[2][1];
+                color += Linear01Depth(tex2D(tex,float2(uv.x+offset, uv.y+offset)).r) * convolutionMat[2][2];
                 
                 color.a = 1;
                 return color;
