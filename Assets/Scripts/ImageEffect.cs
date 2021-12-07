@@ -2,17 +2,16 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[ExecuteInEditMode]
 public class ImageEffect : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
+    public Material EffectMaterial;
+
+    private void Start() {
+        Camera.main.depthTextureMode = DepthTextureMode.Depth;
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+    private void OnRenderImage(RenderTexture src, RenderTexture dest) {
+        Graphics.Blit(src,dest,EffectMaterial);
     }
 }
