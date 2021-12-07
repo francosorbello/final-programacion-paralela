@@ -17,8 +17,7 @@
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
-            // make fog work
-            #pragma multi_compile_fog
+            #pragma enable_d3d11_debug_symbols
 
 
             #include "UnityCG.cginc"
@@ -32,7 +31,6 @@
             struct v2f
             {
                 float2 uv : TEXCOORD0;
-                UNITY_FOG_COORDS(1)
                 float4 vertex : SV_POSITION;
             };
 
@@ -49,103 +47,55 @@
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.uv = TRANSFORM_TEX(v.uv, _MainTex);
-                UNITY_TRANSFER_FOG(o,o.vertex);
                 return o;
             }
 
-            float3x3 CreateBlurMatrix(){
-                float3x3 BLUR_MATRIX;
-                BLUR_MATRIX[0][0] = 0.0625;
-                BLUR_MATRIX[0][1] = 0.125;
-                BLUR_MATRIX[0][2] = 0.0625;
-                
-                BLUR_MATRIX[1][0] = 0.125;
-                BLUR_MATRIX[1][1] = 0.25;
-                BLUR_MATRIX[1][2] = 0.125;
-                
-                BLUR_MATRIX[2][0] = 0.0625;
-                BLUR_MATRIX[2][1] = 0.125;
-                BLUR_MATRIX[2][2] = 0.0625;
-
-                return BLUR_MATRIX;
-            }
-
-            float3x3 CreateBoxBlur(){
-                float3x3 BLUR_MATRIX;
-                BLUR_MATRIX[0][0] = 1;
-                BLUR_MATRIX[0][1] = 1;
-                BLUR_MATRIX[0][2] = 1;
-                
-                BLUR_MATRIX[1][0] = 1;
-                BLUR_MATRIX[1][1] = 1;
-                BLUR_MATRIX[1][2] = 1;
-                
-                BLUR_MATRIX[2][0] = 1;
-                BLUR_MATRIX[2][1] = 1;
-                BLUR_MATRIX[2][2] = 1;
-
-                return BLUR_MATRIX / 9;
-            }
-
-            float3x3 CreateOutilineMatrix(){
-                float3x3 BLUR_MATRIX;
-                BLUR_MATRIX[0][0] = -1;
-                BLUR_MATRIX[0][1] = -1;
-                BLUR_MATRIX[0][2] = -1;
-                
-                BLUR_MATRIX[1][0] = -1;
-                BLUR_MATRIX[1][1] = 8;
-                BLUR_MATRIX[1][2] = -1;
-                
-                BLUR_MATRIX[2][0] = -1;
-                BLUR_MATRIX[2][1] = -1;
-                BLUR_MATRIX[2][2] = -1;
-                
-                return BLUR_MATRIX;
-            }
-
-            float3x3 GetAdjacentValues(float2 uv)
+            float3x3 GetAdjacentValues(float2 uv,sampler2D tex)
             {
                 float3x3 adjacent;
                 float offset = _MainTex_TexelSize.x * _Strength;
-                adjacent[0][0] = tex2D(_MainTex,float2(uv.x-offset, uv.y-offset));
-                adjacent[0][1] = tex2D(_MainTex,float2(uv.x, uv.y-offset));
-                adjacent[0][2] = tex2D(_MainTex,float2(uv.x+offset, uv.y+offset));
-                
-                adjacent[1][0] = tex2D(_MainTex,float2(uv.x-offset, uv.y));
-                adjacent[1][1] = tex2D(_MainTex,float2(uv.x, uv.y));
-                adjacent[1][2] = tex2D(_MainTex,float2(uv.x+offset, uv.y));
-                
-                adjacent[2][0] = tex2D(_MainTex,float2(uv.x-offset, uv.y+offset));
-                adjacent[2][1] = tex2D(_MainTex,float2(uv.x, uv.y+offset));
-                adjacent[2][2] = tex2D(_MainTex,float2(uv.x+offset, uv.y+offset));
 
-                adjacent = adjacent * _Quantity;
+                adjacent[0][0] = tex2D(tex,float2(uv.x-offset, uv.y-offset));
+                adjacent[0][1] = tex2D(tex,float2(uv.x, uv.y-offset));
+                adjacent[0][2] = tex2D(tex,float2(uv.x+offset, uv.y+offset));
+                
+                adjacent[1][0] = tex2D(tex,float2(uv.x-offset, uv.y));
+                adjacent[1][1] = tex2D(tex,uv);
+                adjacent[1][2] = tex2D(tex,float2(uv.x+offset, uv.y));
+                
+                adjacent[2][0] = tex2D(tex,float2(uv.x-offset, uv.y+offset));
+                adjacent[2][1] = tex2D(tex,float2(uv.x, uv.y+offset));
+                adjacent[2][2] = tex2D(tex,float2(uv.x+offset, uv.y+offset));
+
+                // adjacent = adjacent * _Quantity;
 
                 return adjacent;
             }
 
+            fixed4 Convolute(float2 uv,sampler2D tex, float4x4 convolutionMat)
+            {
+                fixed4 color = fixed4(0,0,0,0);
+                float offset = _MainTex_TexelSize.x * _Strength;
+
+                color += tex2D(tex,float2(uv.x-offset, uv.y-offset)) * convolutionMat[0][0];
+                color += tex2D(tex,float2(uv.x, uv.y-offset)) * convolutionMat[0][1];
+                color += tex2D(tex,float2(uv.x+offset, uv.y+offset)) * convolutionMat[0][2];
+                
+                color += tex2D(tex,float2(uv.x-offset, uv.y)) * convolutionMat[1][0];
+                color += tex2D(tex,uv) * convolutionMat[1][1];
+                color += tex2D(tex,float2(uv.x+offset, uv.y)) * convolutionMat[1][2];
+                
+                color += tex2D(tex,float2(uv.x-offset, uv.y+offset)) * convolutionMat[2][0];
+                color += tex2D(tex,float2(uv.x, uv.y+offset)) * convolutionMat[2][1];
+                color += tex2D(tex,float2(uv.x+offset, uv.y+offset)) * convolutionMat[2][2];
+
+                return color;
+            }
+
             fixed4 frag (v2f i) : SV_Target
             {
-                float3x3 blurMatrix = CreateBoxBlur();
-                float3x3 adjacent = GetAdjacentValues(i.uv);
-                // sample the texture
-                // fixed4 col = tex2D(_MainTex, i.uv);
-                // return tex2D(_MainTex,i.uv);
-                fixed4 originalColor = tex2D(_MainTex,i.uv);
-                fixed4 col = fixed4(0,0,0,0) + tex2D(_MainTex,i.uv) * (1-_Quantity);
-                for(int i = 0; i < 3; i++)
-                {
-                    for(int j = 0; j < 3; j++)
-                    {
-                        col += adjacent[i][j] * _ConvolutionMatrix[i][j];
-                    }
-                }
-                col.a = 1;
-                col *= originalColor * _Color;
 
-                UNITY_APPLY_FOG(i.fogCoord, col);
-                return col;
+                return Convolute(i.uv,_MainTex,_ConvolutionMatrix);
             }
             ENDCG
         }

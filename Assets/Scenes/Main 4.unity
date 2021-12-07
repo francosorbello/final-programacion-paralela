@@ -1116,14 +1116,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 511091487}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 20306437b9ae01f4e99c0b568d3c64b4, type: 3}
+  m_Script: {fileID: 11500000, guid: 5cb2bbc97b104914c870399ad907d85b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  computeShader: {fileID: 7200000, guid: 4cdf0d134a7204446b07367c370ba44c, type: 3}
   InputTexture: {fileID: 2800000, guid: 4b00f33d0cfa6f941bfb272bdc8cc0d2, type: 3}
-  OutputTexture: {fileID: 0}
-  Strength: 4
-  Kernels: []
+  outputImage: {fileID: 511091490}
+  Identitykernel: {fileID: 11400000, guid: e04f9fccf8b042a44bb4e7d27719bd93, type: 2}
 --- !u!114 &511091490
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1136,7 +1134,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1344c3c82d62a2a41a3576d8abb8e3ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Material: {fileID: 2100000, guid: a43288b604462ad47a84dfe5dd13c23c, type: 2}
+  m_Material: {fileID: 2100000, guid: 088e74dceaff42f44a19e7bb969820fb, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 0
   m_Maskable: 1
@@ -1415,7 +1413,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.89411765, g: 0.589, b: 0.9019608, a: 0}
+  m_BackGroundColor: {r: 0.59839934, g: 0.5882353, b: 0.9019608, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -2351,6 +2349,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   checkboxesContainer: {fileID: 2133922922}
+  multipleChoice: 0
   convolutionManager: {fileID: 511091489}
 --- !u!1 &1904682756
 GameObject:

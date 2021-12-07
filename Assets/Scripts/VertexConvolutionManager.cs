@@ -1,24 +1,27 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
-public class VertexConvolutionManager : MonoBehaviour
+public class VertexConvolutionManager : ConvolutionManager
 {
-    public Renderer meshRenderer;
-    public Texture inputTexture;
-    public Kernel kernel;
-    // Start is called before the first frame update
-    void Start()
-    {
-        if (meshRenderer == null) return;
-        
-        meshRenderer.material.SetTexture("_MainTex",inputTexture);
-        meshRenderer.material.SetMatrix("_ConvolutionMatrix",kernel.GetKernelMatrix());
+    public RawImage outputImage;
+    public Kernel Identitykernel;
+    
+    private void Start() {
+        outputImage.material.SetTexture("_MainTex",InputTexture);
+        outputImage.material.SetMatrix("_ConvolutionMatrix",Identitykernel.GetKernelMatrix());        
     }
 
-    // Update is called once per frame
-    void Update()
+    public override void ApplyFilters(Kernel[] kernels)
     {
-        
+        outputImage.material.SetTexture("_MainTex",InputTexture);
+        outputImage.material.SetMatrix("_ConvolutionMatrix",Identitykernel.GetKernelMatrix());
+        foreach (var kernel in kernels)
+        {
+            outputImage.material.SetInt("_Strength",kernel.Strenght);
+            outputImage.material.SetMatrix("_ConvolutionMatrix",kernel.GetKernelMatrix());
+
+        }
     }
 }

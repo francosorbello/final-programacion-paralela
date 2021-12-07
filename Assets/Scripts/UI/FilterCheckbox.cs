@@ -9,6 +9,7 @@ public class FilterCheckbox : MonoBehaviour
 {
     [SerializeField] private Toggle toggle;
     [SerializeField] private Kernel kernel;
+    public Kernel Kernel=> kernel;
 
     public UnityAction<Kernel,bool> onFilterChange;
 
