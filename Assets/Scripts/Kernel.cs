@@ -6,6 +6,7 @@ using UnityEngine;
 public class Kernel : ScriptableObject 
 {
     public string Name;
+    [Min(1)] public int Strenght = 1;
     [Space]
     [Header("Convolution Matrix")]
     [SerializeField]private Vector3 row1;

@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Sobel
   m_EditorClassIdentifier: 
   Name: Sobel
+  Strenght: 1
   row1: {x: -1, y: -1, z: -1}
   row2: {x: -1, y: 8, z: -1}
   row3: {x: -1, y: -1, z: -1}

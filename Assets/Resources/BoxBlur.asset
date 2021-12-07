@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: BoxBlur
   m_EditorClassIdentifier: 
   Name: BoxBlur
+  Strenght: 4
   row1: {x: 0.11111, y: 0.11111, z: 0.11111}
   row2: {x: 0.11111, y: 0.11111, z: 0.11111}
   row3: {x: 0.11111, y: 0.11111, z: 0.11111}

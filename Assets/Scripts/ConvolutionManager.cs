@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using UnityEngine.UI;
 public struct DebugObject
 {
     public Vector3 data;
@@ -33,21 +33,23 @@ public class ConvolutionManager : MonoBehaviour
         }
         Graphics.Blit(InputTexture,OutputTexture);
         RenderTexture nTex = OutputTexture;
-        var rend = GetComponent<Renderer>();
+        var rend = GetComponent<RawImage>();
         if(rend != null)
-            rend.material.SetTexture("_MainTex",nTex);
+            rend.texture = nTex;
+            // rend.material.SetTexture("_MainTex",nTex);
 
         foreach (var kernel in kernels)
         {
-            nTex = RenderComputeShader(nTex,kernel.GetKernelMatrix());
+            nTex = RenderComputeShader(nTex,kernel);
             
             // var rend = GetComponent<Renderer>();
             if(rend != null)
-                rend.material.SetTexture("_MainTex",nTex);
+                // rend.material.SetTexture("_MainTex",nTex);
+                rend.texture = nTex;
         }
     }
 
-    private RenderTexture RenderComputeShader(RenderTexture inputTex, Matrix4x4 matrixKernel) 
+    private RenderTexture RenderComputeShader(RenderTexture inputTex, Kernel kernel) 
     {
         RenderTexture outputTex = new RenderTexture(512,512,24);
         outputTex.enableRandomWrite = true; 
@@ -60,17 +62,17 @@ public class ConvolutionManager : MonoBehaviour
         computeShader.SetBuffer(0,"DebugBuffer",debugBuffer);
         computeShader.SetTexture(0,"InputTexture",inputTex);
         computeShader.SetTexture(0,"Result",outputTex);
-        computeShader.SetInt("Strength",Strength);
+        computeShader.SetInt("Strength",kernel.Strenght);
 
-        computeShader.SetMatrix("ConvolutionMatrix", matrixKernel);
+        computeShader.SetMatrix("ConvolutionMatrix", kernel.GetKernelMatrix());
         // computeShader.Dispatch(0, 1, 1, 1);
         computeShader.Dispatch(0, outputTex.width / 8, outputTex.height / 8, 1);    
 
-        debugBuffer.GetData(debugData);
-        foreach (var item in debugData)
-        {
-            Debug.Log(item.data);
-        }
+        // debugBuffer.GetData(debugData);
+        // foreach (var item in debugData)
+        // {
+        //     Debug.Log(item.data);
+        // }
 
         debugBuffer.Dispose();
         debugBuffer = null;
