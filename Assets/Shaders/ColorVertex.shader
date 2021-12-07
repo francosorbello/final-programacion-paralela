@@ -50,28 +50,6 @@
                 return o;
             }
 
-            float3x3 GetAdjacentValues(float2 uv,sampler2D tex)
-            {
-                float3x3 adjacent;
-                float offset = _MainTex_TexelSize.x * _Strength;
-
-                adjacent[0][0] = tex2D(tex,float2(uv.x-offset, uv.y-offset));
-                adjacent[0][1] = tex2D(tex,float2(uv.x, uv.y-offset));
-                adjacent[0][2] = tex2D(tex,float2(uv.x+offset, uv.y+offset));
-                
-                adjacent[1][0] = tex2D(tex,float2(uv.x-offset, uv.y));
-                adjacent[1][1] = tex2D(tex,uv);
-                adjacent[1][2] = tex2D(tex,float2(uv.x+offset, uv.y));
-                
-                adjacent[2][0] = tex2D(tex,float2(uv.x-offset, uv.y+offset));
-                adjacent[2][1] = tex2D(tex,float2(uv.x, uv.y+offset));
-                adjacent[2][2] = tex2D(tex,float2(uv.x+offset, uv.y+offset));
-
-                // adjacent = adjacent * _Quantity;
-
-                return adjacent;
-            }
-
             fixed4 Convolute(float2 uv,sampler2D tex, float4x4 convolutionMat)
             {
                 fixed4 color = fixed4(0,0,0,0);
@@ -88,13 +66,14 @@
                 color += tex2D(tex,float2(uv.x-offset, uv.y+offset)) * convolutionMat[2][0];
                 color += tex2D(tex,float2(uv.x, uv.y+offset)) * convolutionMat[2][1];
                 color += tex2D(tex,float2(uv.x+offset, uv.y+offset)) * convolutionMat[2][2];
+                
+                color.a = 1;
 
                 return color;
             }
 
             fixed4 frag (v2f i) : SV_Target
             {
-
                 return Convolute(i.uv,_MainTex,_ConvolutionMatrix);
             }
             ENDCG
