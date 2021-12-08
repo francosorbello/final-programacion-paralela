@@ -1,22 +1,37 @@
-﻿// Each #kernel tells which function to compile; you can have many kernels
+﻿/**
+Realiza convolución de matrices sobre una textura.
+*/
+
 #pragma kernel CSMain
 
+/**
+Contiene data utilizada para debugar el shader
+*/
 struct DebugObject
 {
     float3 data;
 };
 
+/** Buffer con data para debugear el shader */
 RWStructuredBuffer<DebugObject> DebugBuffer;
+/** Textura sobre la que aplicar filtro */
 Texture2D<float4> InputTexture;
+/** Textura con el filtro aplicado */
 RWTexture2D<float4> Result;
+/** Matriz de convolucion */
 float3x3 ConvolutionMatrix;
+/** Resolucion de la textura */
 int Resolution;
+/** Indica con cuanta fuerza se aplica el filtro. */
 int Strength;
 
-float GetBlurPixel(uint3 id, int channel)
+/**
+Para un canal rgb, retorna el valor de la convolución
+@id - coordenadas del pixel
+@channel - canal rgb sobre el que aplicar convolucion. Puede ser 0,1 o 2.
+*/
+float GetConvolutedPixel(uint3 id, int channel)
 {
-    // CreateBlurMatrix();
-
     float3x3 kernelData;
     int offset = 1 * Strength;
     kernelData[0][0] = InputTexture[id.xy-offset][channel];
@@ -42,28 +57,19 @@ float GetBlurPixel(uint3 id, int channel)
 
 //grupos de 64x64(4096), con 8x8(64) hilos
 //(64,64,1) * (8,8,1) + (7,7,1) = (519,519,2)
+
+/**
+Para grupos de 64x64, con 8x8 hilos cada uno, aplica la matriz de convolucion sobre cada pixel
+*/
 [numthreads(8,8,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
-    // TODO: insert actual code here!
     DebugObject o = DebugBuffer[id.x];
     
-    // float finalValue = 0.0;
-    // for(uint i=0; i<3; i++)
-    // {
-    //     for(uint j=0; j<3; j++)
-    //     {
-    //         float2 pos = float2(id.x+i,id.y+j);
-    //         finalValue += InputTexture[pos].r * BLUR_MATRIX[i][j];
-    //     }
-    // }
-    // o.data = float3(InputTexture[id.xy].x, finalValue,0.0);
-    float finalValue = GetBlurPixel(id,0);
-    
     float4 finalColor;
-    finalColor.x = GetBlurPixel(id,0);
-    finalColor.y = GetBlurPixel(id,1);
-    finalColor.z = GetBlurPixel(id,2);
+    finalColor.x = GetConvolutedPixel(id,0);
+    finalColor.y = GetConvolutedPixel(id,1);
+    finalColor.z = GetConvolutedPixel(id,2);
     finalColor.w = 1.0;
     o.data = float3(finalColor.xyz);
     DebugBuffer[id.x] = o;
