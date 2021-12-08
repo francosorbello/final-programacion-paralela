@@ -2,20 +2,35 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+
+/// <summary>
+/// Struct para obtener valores de debug de los compute shaders
+/// </summary>
 public struct DebugObject
 {
     public Vector3 data;
 }
 
+/// <summary>
+/// Aplica kerneles de convolución en compute shaders
+/// </summary>
 public class ComputeConvolutionManager : ConvolutionManager
 {
+    [Tooltip("Shader que aplicará los kernels.")] 
     public ComputeShader computeShader;
-    // public Texture InputTexture;
+    
+    [Tooltip("Textura que contiene la imagen con los filtros aplicados.")] 
     public RenderTexture OutputTexture;
+    
+    [Tooltip("Buffer donde se guardan valores para debugear.")] 
     public ComputeBuffer debugBuffer;
-    [Range(1,4)]public int Strength = 1;
+    
+    [Range(1,4)] public int Strength = 1;
+    
+    [Tooltip("Lista de kernels a aplicar sobre la imagen")]
     public Kernel[] Kernels;
 
+    //Almacena los valores del debugBuffer.
     private DebugObject[] debugData;
 
     private void Start() 
@@ -23,8 +38,13 @@ public class ComputeConvolutionManager : ConvolutionManager
         ApplyFilters(Kernels);
     }
 
+    /// <summary>
+    /// Aplica una serie de kernels a una imagen.
+    /// <param name="kernels"> Lista de kernels a aplicar </param>
+    /// </summary>
     public override void ApplyFilters(Kernel[] kernels)
     {
+        //genero una nueva textura de salida
         if (OutputTexture == null)
         {
             OutputTexture = new RenderTexture(512,512,24);
@@ -33,11 +53,11 @@ public class ComputeConvolutionManager : ConvolutionManager
         }
         Graphics.Blit(InputTexture,OutputTexture);
         RenderTexture nTex = OutputTexture;
+        
         var rend = GetComponent<RawImage>();
         if(rend != null)
             rend.texture = nTex;
-            // rend.material.SetTexture("_MainTex",nTex);
-
+        
         foreach (var kernel in kernels)
         {
             nTex = RenderComputeShader(nTex,kernel);
@@ -49,6 +69,11 @@ public class ComputeConvolutionManager : ConvolutionManager
         }
     }
 
+    /// <summary>
+    /// Para una imagen y un kernel, retorna la textura con el kernel aplicado.
+    /// <param name="inputTex"> Textura sobre la que aplicar el filtro. </param>
+    /// <param name="kernel"> Kernel a aplicar. </param>
+    /// </summary>
     private RenderTexture RenderComputeShader(RenderTexture inputTex, Kernel kernel) 
     {
         RenderTexture outputTex = new RenderTexture(512,512,24);
@@ -64,8 +89,7 @@ public class ComputeConvolutionManager : ConvolutionManager
         computeShader.SetTexture(0,"Result",outputTex);
         computeShader.SetInt("Strength",kernel.Strenght);
 
-        computeShader.SetMatrix("ConvolutionMatrix", kernel.GetKernelMatrix());
-        // computeShader.Dispatch(0, 1, 1, 1);
+        computeShader.SetMatrix("ConvolutionMatrix", kernel.GetKernelMatrix());        
         computeShader.Dispatch(0, outputTex.width / 8, outputTex.height / 8, 1);    
 
         // debugBuffer.GetData(debugData);

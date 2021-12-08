@@ -98,6 +98,7 @@
                 fixed4 depthHor = GetSobelDepthHorizontal(_CameraDepthTexture,i.uv);
                 fixed4 depthVer = GetSobelDepthVertical(_CameraDepthTexture,i.uv);
                 float edge = sqrt(depthHor*depthHor + depthVer * depthVer);
+                // return float4(edge,0,0,1);
                 // return blend();
                 return lerp(col,_OutlineColor,edge);
             }

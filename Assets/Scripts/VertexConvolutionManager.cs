@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Aplica kerneles de convolución en vertex shaders
+/// </summary>
 public class VertexConvolutionManager : ConvolutionManager
 {
     public RawImage outputImage;
