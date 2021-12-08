@@ -40,11 +40,10 @@ public class ComputeConvolutionManager : ConvolutionManager
 
     /// <summary>
     /// Aplica una serie de kernels a una imagen.
-    /// <param name="kernels"> Lista de kernels a aplicar </param>
     /// </summary>
+    /// <param name="kernels"> Lista de kernels a aplicar </param>
     public override void ApplyFilters(Kernel[] kernels)
     {
-        //genero una nueva textura de salida
         if (OutputTexture == null)
         {
             OutputTexture = new RenderTexture(512,512,24);
