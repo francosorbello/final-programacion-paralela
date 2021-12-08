@@ -1,4 +1,7 @@
-﻿Shader "Unlit/SobelOutline"
+﻿/**
+Genera un outline utilizando el operador Sobel
+*/
+Shader "Unlit/SobelOutline"
 {
     Properties
     {
@@ -38,6 +41,7 @@
             float4 _MainTex_ST;
             float4 _MainTex_TexelSize;
             fixed4 _OutlineColor;
+            /** Textura con el depth buffer de la camara */
             sampler2D _CameraDepthTexture;
             int _Strength;
 
@@ -50,7 +54,9 @@
                 return o;
             }
 
-
+            /**
+            Aplica una matriz de convolucion sobre los valores del depth buffer
+            */
             fixed4 GetSobelDepth(sampler2D tex, float2 uv, float3x3 convolutionMat)
             {
                 fixed4 color = fixed4(0,0,0,0);
@@ -72,6 +78,9 @@
                 return color;
             }
             
+            /**
+            Retorna el color del Operador de sobel horizontal.
+            */
             fixed4 GetSobelDepthHorizontal(sampler2D tex, float2 uv)
             {
                 float3x3 convolutionMat = float3x3(
@@ -81,6 +90,9 @@
                 return GetSobelDepth(tex,uv,convolutionMat);
             }
 
+            /**
+            Retorna el color del Operador de sobel horizontal.
+            */
             fixed4 GetSobelDepthVertical(sampler2D tex, float2 uv)
             {
                 float3x3 convolutionMat = float3x3(
@@ -98,8 +110,12 @@
                 fixed4 depthHor = GetSobelDepthHorizontal(_CameraDepthTexture,i.uv);
                 fixed4 depthVer = GetSobelDepthVertical(_CameraDepthTexture,i.uv);
                 float edge = sqrt(depthHor*depthHor + depthVer * depthVer);
+                
                 // return float4(edge,0,0,1);
-                // return blend();
+
+                //interpolo entre el color original y el del outline para dibujar ambos.
+                //se usa el valor de la convolucion como step para que pinte con el outline cuando este valor sea alto
+                //(es decir, que haya un outline)
                 return lerp(col,_OutlineColor,edge);
             }
             ENDCG
