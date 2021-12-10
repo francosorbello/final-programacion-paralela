@@ -15,5 +15,8 @@ public class CameraRotator : MonoBehaviour
     {
         if(rotationActive)
             transform.Rotate(0, speed * Time.deltaTime, 0 );
+
+        if(Input.GetKeyDown(KeyCode.Space))
+            rotationActive = !rotationActive;
     }
 }
