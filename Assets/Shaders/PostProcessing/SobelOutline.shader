@@ -105,13 +105,14 @@ Shader "Unlit/SobelOutline"
             fixed4 frag (v2f i) : SV_Target
             {
                 float depth = tex2D(_CameraDepthTexture,i.uv).r;
+                // return depth;
                 // return Linear01Depth(depth);
                 fixed4 col = tex2D(_MainTex, i.uv);
                 fixed4 depthHor = GetSobelDepthHorizontal(_CameraDepthTexture,i.uv);
                 fixed4 depthVer = GetSobelDepthVertical(_CameraDepthTexture,i.uv);
                 float edge = sqrt(depthHor*depthHor + depthVer * depthVer);
                 
-                // return float4(edge,0,0,1);
+                // return float4(edge,edge,edge,1);
 
                 //interpolo entre el color original y el del outline para dibujar ambos.
                 //se usa el valor de la convolucion como step para que pinte con el outline cuando este valor sea alto

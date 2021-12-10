@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Sharpen
   m_EditorClassIdentifier: 
   Name: Sharpen
-  Strenght: 1
+  Strenght: 2
   row1: {x: 0, y: -1, z: 0}
   row2: {x: -1, y: 5, z: -1}
   row3: {x: 0, y: -1, z: 0}

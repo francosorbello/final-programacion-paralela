@@ -15,5 +15,5 @@ MonoBehaviour:
   Name: Vertical Sobel
   Strenght: 1
   row1: {x: -1, y: 0, z: 1}
-  row2: {x: -2, y: 0, z: -2}
-  row3: {x: 1, y: 0, z: 1}
+  row2: {x: -2, y: 0, z: 2}
+  row3: {x: -1, y: 0, z: 1}
