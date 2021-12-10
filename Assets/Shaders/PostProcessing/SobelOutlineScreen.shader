@@ -1,7 +1,8 @@
 ﻿/**
-Genera un outline utilizando el operador Sobel
+Genera un outline utilizando el operador Sobel.
+El outline se calcula sobre la pantalla completa.
 */
-Shader "Unlit/SobelOutline"
+Shader "Unlit/SobelOutlineScreen"
 {
     Properties
     {
@@ -62,17 +63,17 @@ Shader "Unlit/SobelOutline"
                 fixed4 color = fixed4(0,0,0,0);
                 float offset = _MainTex_TexelSize.x * _Strength;
 
-                color += Linear01Depth(tex2D(tex,float2(uv.x-offset, uv.y-offset)).r) * convolutionMat[0][0];
-                color += Linear01Depth(tex2D(tex,float2(uv.x, uv.y-offset)).r) * convolutionMat[0][1];
-                color += Linear01Depth(tex2D(tex,float2(uv.x+offset, uv.y+offset)).r) * convolutionMat[0][2];
+                color += tex2D(tex,float2(uv.x-offset, uv.y-offset)).r * convolutionMat[0][0];
+                color += tex2D(tex,float2(uv.x, uv.y-offset)).r * convolutionMat[0][1];
+                color += tex2D(tex,float2(uv.x+offset, uv.y+offset)).r * convolutionMat[0][2];
                 
-                color += Linear01Depth(tex2D(tex,float2(uv.x-offset, uv.y)).r) * convolutionMat[1][0];
-                color += Linear01Depth(tex2D(tex,uv).r) * convolutionMat[1][1];
-                color += Linear01Depth(tex2D(tex,float2(uv.x+offset, uv.y)).r) * convolutionMat[1][2];
+                color += tex2D(tex,float2(uv.x-offset, uv.y)).r * convolutionMat[1][0];
+                color += tex2D(tex,uv).r * convolutionMat[1][1];
+                color += tex2D(tex,float2(uv.x+offset, uv.y)).r * convolutionMat[1][2];
                 
-                color += Linear01Depth(tex2D(tex,float2(uv.x-offset, uv.y+offset)).r) * convolutionMat[2][0];
-                color += Linear01Depth(tex2D(tex,float2(uv.x, uv.y+offset)).r) * convolutionMat[2][1];
-                color += Linear01Depth(tex2D(tex,float2(uv.x+offset, uv.y+offset)).r) * convolutionMat[2][2];
+                color += tex2D(tex,float2(uv.x-offset, uv.y+offset)).r * convolutionMat[2][0];
+                color += tex2D(tex,float2(uv.x, uv.y+offset)).r * convolutionMat[2][1];
+                color += tex2D(tex,float2(uv.x+offset, uv.y+offset)).r * convolutionMat[2][2];
                 
                 color.a = 1;
                 return color;
@@ -108,8 +109,8 @@ Shader "Unlit/SobelOutline"
                 // return depth;
                 // return Linear01Depth(depth);
                 fixed4 col = tex2D(_MainTex, i.uv);
-                fixed4 depthHor = GetSobelDepthHorizontal(_CameraDepthTexture,i.uv);
-                fixed4 depthVer = GetSobelDepthVertical(_CameraDepthTexture,i.uv);
+                fixed4 depthHor = GetSobelDepthHorizontal(_MainTex,i.uv);
+                fixed4 depthVer = GetSobelDepthVertical(_MainTex,i.uv);
                 float edge = sqrt(depthHor*depthHor + depthVer * depthVer);
                 
                 // return float4(edge,edge,edge,1);

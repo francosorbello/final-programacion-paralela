@@ -60,10 +60,7 @@ public class ComputeConvolutionManager : ConvolutionManager
         foreach (var kernel in kernels)
         {
             nTex = RenderComputeShader(nTex,kernel);
-            
-            // var rend = GetComponent<Renderer>();
             if(rend != null)
-                // rend.material.SetTexture("_MainTex",nTex);
                 rend.texture = nTex;
         }
     }
